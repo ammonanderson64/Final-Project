@@ -1,0 +1,225 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Globalization;
+
+public class TaskItem : IComparable<TaskItem>
+{
+    public string Name { get; set; }
+    public int Priority { get; set; }
+    public DateTime DueDate { get; set; }
+    public string Status { get; set; } = "Pending";
+
+    public TaskItem(string name, int priority, DateTime dueDate)
+    {
+        Name = name;
+        Priority = priority;
+        DueDate = dueDate;
+    }
+
+    public int CompareTo(TaskItem other)
+    {
+        return DueDate.CompareTo(other.DueDate);
+    }
+
+    public override string ToString()
+    {
+        ConsoleColor originalColor = Console.ForegroundColor;
+        switch (Status)
+        {
+            case "Completed":
+                Console.ForegroundColor = ConsoleColor.Green;
+                break;
+            case "Failed":
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            case "Pending":
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                break;
+            default:
+                Console.ForegroundColor = originalColor;
+                break;
+        }
+        string output = $"{Name} | Priority: {Priority} | Due: {DueDate.ToShortDateString()} | Status: {Status}";
+        Console.ForegroundColor = originalColor;
+        return output;
+    }
+}
+
+class Program
+{
+    static List<TaskItem> taskList = new();
+    static List<TaskItem> completedTasks = new();
+    static List<TaskItem> failedTasks = new();
+    static Stack<string> undoHistory = new();
+
+    static void Main()
+    {
+        bool running = true;
+        while (running)
+        {
+            ShowMenu();
+            string input = Console.ReadLine();
+            Console.WriteLine();
+
+            switch (input)
+            {
+                case "1": AddTask(); break;
+                case "2": ViewTasks(); break;
+                case "3": UpdateTaskStatus("Completed"); break;
+                case "4": UpdateTaskStatus("Failed"); break;
+                case "5": Undo(); break;
+                case "6": PrintList(completedTasks, "Completed Tasks"); break;
+                case "7": PrintList(failedTasks, "Failed Tasks"); break;
+                case "8": FilterAndSort(); break;
+                case "9": running = false; break;
+                default: Console.WriteLine("Invalid input. Try again."); break;
+            }
+
+            Console.WriteLine();
+        }
+    }
+
+    static void ShowMenu()
+    {
+        Console.WriteLine("========== TASK MANAGER ==========");
+        Console.WriteLine("1. Add Task");
+        Console.WriteLine("2. View All Tasks");
+        Console.WriteLine("3. Mark Task as Completed");
+        Console.WriteLine("4. Mark Task as Failed");
+        Console.WriteLine("5. Undo Last Action");
+        Console.WriteLine("6. View Completed Tasks");
+        Console.WriteLine("7. View Failed Tasks");
+        Console.WriteLine("8. Filter/Sort Tasks");
+        Console.WriteLine("9. Exit");
+        Console.Write("Choose an option: ");
+    }
+
+    static void AddTask()
+    {
+        Console.Write("Task Name: ");
+        string name = Console.ReadLine()?.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Console.WriteLine("Task name cannot be empty.");
+            return;
+        }
+        if (taskList.Any(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        {
+            Console.WriteLine("Task already exists.");
+            return;
+        }
+
+        Console.Write("Priority (1-10): ");
+        if (!int.TryParse(Console.ReadLine(), out int priority) || priority < 1 || priority > 10)
+        {
+            Console.WriteLine("Invalid number. Priority must be between 1 and 10.");
+            return;
+        }
+
+        Console.Write("Due Date (yyyy-MM-dd): ");
+        string dateInput = Console.ReadLine();
+        if (!DateTime.TryParseExact(dateInput, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dueDate))
+        {
+            Console.WriteLine("Invalid date. Please use format yyyy-MM-dd.");
+            return;
+        }
+
+        var task = new TaskItem(name, priority, dueDate);
+        taskList.Add(task);
+        undoHistory.Push($"Add:{name}");
+        Console.WriteLine("Task added.");
+    }
+
+    static void ViewTasks()
+    {
+        PrintList(taskList, "Pending Tasks");
+    }
+
+    static void PrintList(List<TaskItem> list, string title)
+    {
+        Console.WriteLine($"\n--- {title} ---");
+        if (!list.Any()) Console.WriteLine("No tasks.");
+        else foreach (var task in list) Console.WriteLine(task);
+    }
+
+    static void UpdateTaskStatus(string status)
+    {
+        Console.Write("Enter task name: ");
+        string name = Console.ReadLine()?.Trim();
+
+        var task = taskList.FirstOrDefault(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        if (task == null)
+        {
+            Console.WriteLine("Task not found.");
+            return;
+        }
+
+        task.Status = status;
+        if (status == "Completed") completedTasks.Add(task);
+        if (status == "Failed") failedTasks.Add(task);
+        taskList.Remove(task);
+        undoHistory.Push($"Status:{task.Name}:{status}");
+        Console.WriteLine($"Marked as {status}.");
+    }
+
+    static void Undo()
+    {
+        if (!undoHistory.Any())
+        {
+            Console.WriteLine("Nothing to undo.");
+            return;
+        }
+
+        string action = undoHistory.Pop();
+        var parts = action.Split(":");
+
+        if (parts[0] == "Add")
+        {
+            var task = taskList.FirstOrDefault(t => t.Name.Equals(parts[1], StringComparison.OrdinalIgnoreCase));
+            if (task != null)
+            {
+                taskList.Remove(task);
+                Console.WriteLine($"Undid task addition: {task.Name}");
+            }
+        }
+        else if (parts[0] == "Status")
+        {
+            string name = parts[1];
+            string status = parts[2];
+            var list = status == "Completed" ? completedTasks : failedTasks;
+            var task = list.FirstOrDefault(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (task != null)
+            {
+                task.Status = "Pending";
+                taskList.Add(task);
+                list.Remove(task);
+                Console.WriteLine($"Undid status change: {name} -> Pending");
+            }
+        }
+    }
+
+    static void FilterAndSort()
+    {
+        Console.WriteLine("Filter by status (Pending/Completed/Failed/All): ");
+        string status = Console.ReadLine().Trim();
+
+        var filtered = status.ToLower() switch
+        {
+            "completed" => completedTasks,
+            "failed" => failedTasks,
+            "pending" => taskList,
+            _ => taskList.Concat(completedTasks).Concat(failedTasks).ToList()
+        };
+
+        Console.WriteLine("Sort by (priority/date): ");
+        string sort = Console.ReadLine().Trim();
+
+        if (sort == "priority")
+            filtered = filtered.OrderByDescending(t => t.Priority).ToList();
+        else
+            filtered = filtered.OrderBy(t => t.DueDate).ToList();
+
+        PrintList(filtered, $"Filtered and Sorted Tasks ({status})");
+    }
+}
