@@ -1,4 +1,4 @@
-## IV. Tree (Binary Search Tree)
+##  Tree (Binary Search Tree)
 
 ### Introduction
 
