@@ -12,9 +12,9 @@ makes queues great for showing tasks in the order they were created. When users 
 to the back of the line. When tasks are shown or checked off, they’re taken from the front. This 
 system keeps things fair and predictable.
 
-By using both a stack and a queue, our task manager gives users flexibility. The stack provides an 
-undo option, and the queue keeps task order clear. Together, they help manage tasks more smoothly 
-and show how each data structure fits real-world needs.
+In the code, the stack remembers recent actions to support an undo button, while the queue keeps 
+tasks lined up in the right order. These two tools work together to give users more control and a 
+smoother experience.
 
 ### Stack & Queue Terminology
 
