@@ -2,8 +2,19 @@
 
 ### Introduction
 
-**Stack** is a Last-In-First-Out (LIFO) structure used to store the history of actions like undoing task status.
-**Queue** is a First-In-First-Out (FIFO) structure used to handle task scheduling and display.
+Stacks and queues are simple yet powerful tools for organizing data. A **stack** is like a pile of 
+dishes — the last dish placed on top is the first one taken off. In this project, the stack helps 
+users undo actions like adding or completing a task. Each time something changes, we record it on 
+the stack. If the user wants to go back, we just remove the most recent change.
+
+A **queue** is more like a line at a store. The first task added is the first one processed. This 
+makes queues great for showing tasks in the order they were created. When users add tasks, they go 
+to the back of the line. When tasks are shown or checked off, they’re taken from the front. This 
+system keeps things fair and predictable.
+
+By using both a stack and a queue, our task manager gives users flexibility. The stack provides an 
+undo option, and the queue keeps task order clear. Together, they help manage tasks more smoothly 
+and show how each data structure fits real-world needs.
 
 ### Stack & Queue Terminology
 
