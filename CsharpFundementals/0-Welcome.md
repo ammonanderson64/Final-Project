@@ -3,7 +3,7 @@
 ### Introduction
 
 Welcome to the Task Manager Data Structures Tutorial!
-In this tutorial, you’ll learn how to use five essential data structures: **Stack**, **Queue**, **Set**, **Linked List**, and **Binary Search Tree**. These structures are key to building efficient and feature-rich applications.
+In this tutorial, you’ll learn how to use three essential data structures: **Stack** **&** **Queue**, **Set** **&** **Linked List**, and **Binary Search Tree**. These structures are key to building efficient and feature-rich applications.
 
 By the end of this tutorial, you will:
 
