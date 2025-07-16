@@ -27,18 +27,10 @@ public class TaskItem : IComparable<TaskItem>
         ConsoleColor originalColor = Console.ForegroundColor;
         switch (Status)
         {
-            case "Completed":
-                Console.ForegroundColor = ConsoleColor.Green;
-                break;
-            case "Failed":
-                Console.ForegroundColor = ConsoleColor.Red;
-                break;
-            case "Pending":
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                break;
-            default:
-                Console.ForegroundColor = originalColor;
-                break;
+            case "Completed": Console.ForegroundColor = ConsoleColor.Green; break;
+            case "Failed": Console.ForegroundColor = ConsoleColor.Red; break;
+            case "Pending": Console.ForegroundColor = ConsoleColor.Yellow; break;
+            default: Console.ForegroundColor = originalColor; break;
         }
         string output = $"{Name} | Priority: {Priority} | Due: {DueDate.ToShortDateString()} | Status: {Status}";
         Console.ForegroundColor = originalColor;
@@ -52,6 +44,10 @@ class Program
     static List<TaskItem> completedTasks = new();
     static List<TaskItem> failedTasks = new();
     static Stack<string> undoHistory = new();
+    static Queue<TaskItem> taskQueue = new();
+    // Store all task names in lower-case for case-insensitive comparison
+    static HashSet<string> taskNames = new(StringComparer.OrdinalIgnoreCase);
+    static BinarySearchTree taskTree = new();
 
     static void Main()
     {
@@ -104,7 +100,8 @@ class Program
             Console.WriteLine("Task name cannot be empty.");
             return;
         }
-        if (taskList.Any(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        // Use lower-case for all name checks
+        if (taskNames.Contains(name))
         {
             Console.WriteLine("Task already exists.");
             return;
@@ -127,6 +124,9 @@ class Program
 
         var task = new TaskItem(name, priority, dueDate);
         taskList.Add(task);
+        taskQueue.Enqueue(task);
+        taskNames.Add(name);
+        taskTree.Insert(task);
         undoHistory.Push($"Add:{name}");
         Console.WriteLine("Task added.");
     }
@@ -180,6 +180,9 @@ class Program
             if (task != null)
             {
                 taskList.Remove(task);
+                taskQueue = new Queue<TaskItem>(taskQueue.Where(t => !t.Name.Equals(parts[1], StringComparison.OrdinalIgnoreCase)));
+                taskNames.Remove(task.Name);
+                taskTree.Remove(task); // Remove from tree as well
                 Console.WriteLine($"Undid task addition: {task.Name}");
             }
         }
@@ -212,14 +215,106 @@ class Program
             _ => taskList.Concat(completedTasks).Concat(failedTasks).ToList()
         };
 
-        Console.WriteLine("Sort by (priority/date): ");
+        Console.WriteLine("Sort by (priority/date/tree): ");
         string sort = Console.ReadLine().Trim();
 
         if (sort == "priority")
             filtered = filtered.OrderByDescending(t => t.Priority).ToList();
+        else if (sort == "tree")
+        {
+            Console.WriteLine("--- Sorted using Binary Search Tree (by due date) ---");
+            taskTree.InOrderTraversal();
+            return;
+        }
         else
             filtered = filtered.OrderBy(t => t.DueDate).ToList();
 
         PrintList(filtered, $"Filtered and Sorted Tasks ({status})");
+    }
+}
+
+public class TreeNode
+{
+    public TaskItem Data;
+    public TreeNode Left, Right;
+
+    public TreeNode(TaskItem data)
+    {
+        Data = data;
+    }
+}
+
+public class BinarySearchTree
+{
+    private TreeNode root;
+
+    public void Insert(TaskItem task)
+    {
+        root = InsertRec(root, task);
+    }
+
+    private TreeNode InsertRec(TreeNode node, TaskItem task)
+    {
+        if (node == null) return new TreeNode(task);
+        if (task.DueDate < node.Data.DueDate)
+            node.Left = InsertRec(node.Left, task);
+        else
+            node.Right = InsertRec(node.Right, task);
+        return node;
+    }
+
+    public void Remove(TaskItem task)
+    {
+        root = RemoveRec(root, task);
+    }
+
+    private TreeNode RemoveRec(TreeNode node, TaskItem task)
+    {
+        if (node == null) return null;
+        if (task.DueDate < node.Data.DueDate)
+            node.Left = RemoveRec(node.Left, task);
+        else if (task.DueDate > node.Data.DueDate)
+            node.Right = RemoveRec(node.Right, task);
+        else if (node.Data.Name.Equals(task.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            // Node with only one child or no child
+            if (node.Left == null)
+                return node.Right;
+            else if (node.Right == null)
+                return node.Left;
+
+            // Node with two children: Get the inorder successor (smallest in the right subtree)
+            node.Data = MinValue(node.Right);
+            node.Right = RemoveRec(node.Right, node.Data);
+        }
+        else
+        {
+            node.Right = RemoveRec(node.Right, task);
+        }
+        return node;
+    }
+
+    private TaskItem MinValue(TreeNode node)
+    {
+        TaskItem minv = node.Data;
+        while (node.Left != null)
+        {
+            minv = node.Left.Data;
+            node = node.Left;
+        }
+        return minv;
+    }
+
+    public void InOrderTraversal()
+    {
+        InOrderRec(root);
+    }
+
+    private void InOrderRec(TreeNode node)
+    {
+        if (node == null) return;
+        InOrderRec(node.Left);
+        Console.WriteLine(node.Data);
+        InOrderRec(node.Right);
     }
 }
