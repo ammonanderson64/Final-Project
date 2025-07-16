@@ -2,8 +2,17 @@
 
 ### Introduction
 
-A **Set** is a collection of unique values, ideal for storing task names and preventing duplicates.
-A **Linked List** allows for dynamic memory allocation and efficient insertion/removal in task lists.
+Sets and linked lists help manage task names and storage. A **set** keeps task names unique so 
+users don't accidentally create the same task twice. A **linked list** is used to hold the tasks 
+in memory, making it easy to add or remove tasks as needed.
+
+In the app, we check the set before adding a new task. If the name already exists, we can tell the 
+user and suggest combining similar tasks. The linked list stores tasks in the order they were 
+entered, and it's easy to work with when adding or removing tasks.
+
+The code uses a HashSet to make sure task names aren't duplicated, and a list that acts like a 
+linked list to hold the task details. This helps the app stay organized and prevents confusion 
+from repeated task names.
 
 ### Set & Linked List Terminology
 
