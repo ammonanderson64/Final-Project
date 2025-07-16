@@ -1,0 +1,47 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code settings
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Windows image file caches
+Thumbs.db
+
+# Rider IDE files
+.idea/
+
+# Logs
+*.log
+
+# Dotnet CLI packages and cache
+.nuget/
+*.nupkg
+project.lock.json
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Coverage reports
+coverage/
+
+# Others
+*.tmp
+*.bak
+
+# Ignore published files
+publish/
+
+# Ignore test results
+TestResults/
