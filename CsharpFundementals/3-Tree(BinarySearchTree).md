@@ -2,7 +2,17 @@
 
 ### Introduction
 
-A **Binary Search Tree (BST)** is a hierarchical structure that organizes tasks by due date, allowing for fast retrieval in sorted order.
+A **Binary Search Tree (BST)** helps the task manager show tasks in order by priority or due date. 
+Each task is placed in the tree depending on its value, which helps users see what’s most 
+important first.
+
+The BST has a main node at the top (the root), and tasks are added to the left or right based on 
+their importance. If the priority is higher (lower number), the task goes left. If it’s lower 
+(higher number), it goes right. This makes tasks easy to sort and display.
+
+In the code, tasks are added to the BST and shown in order using a method called in-order 
+traversal. This lets users see their most urgent tasks first. The tree structure also helps with 
+adding, finding, or checking tasks quickly.
 
 ### Tree Terminology
 
