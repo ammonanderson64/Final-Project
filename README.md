@@ -1,6 +1,7 @@
 # Task Manager - Data Structures Tutorial
 
-This C# tutorial project demonstrates how to use core data structures by building a console-based Task Manager. It is structured for students learning CSE 212 concepts and is based on the BYUI repo format.
+This C# tutorial project demonstrates how to use core data structures by building a console-based 
+Task Manager. It is structured for students learning CSE 212 concepts.
 
 ---
 
